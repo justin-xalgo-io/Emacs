@@ -11,7 +11,6 @@
 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
-
 ; List required packages.
 (setq package-list
     '(python-environment deferred epc 
@@ -20,7 +19,6 @@
         sql-indent sql exec-path-from-shell iedit projectile auctex
         auto-complete popup let-alist magit minimap popup rust-mode
 		python-mode doom-themes))
-
 
 ; Activate all the packages.
 (package-initialize)
