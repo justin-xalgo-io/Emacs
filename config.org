@@ -26,50 +26,50 @@
 
 ** Required Packages
 #+BEGIN_SRC emacs-lisp
-                ;; List required packages.
-                (setq package-list
-                      '(python-environment
-                        move-text
-                        flyspell-correct
-                        deferred
-                        epc 
-                        flycheck
-                        ctable
-                        jedi
-                        concurrent
-                        company
-                        cyberpunk-theme
-                        elpy 
-                        yasnippet
-                        pyvenv
-                        highlight-indentation
-                        find-file-in-project 
-                        sql-indent
-                        sql
-                        exec-path-from-shell
-                        iedit
-                        projectile
-                        auctex
-                        auto-complete
-                        popup
-                        let-alist
-                        magit
-                        minimap
-                        popup
-                        rust-mode
-                        python-mode
-                        doom-themes
-  		      compat
-            	        cond-let
-                        llama
-        	        seq
-      	                transient
-    	                with-editor))
+  ;; List required packages.
+  (setq package-list
+        '(python-environment
+          move-text
+          flyspell-correct
+          deferred
+          epc 
+          flycheck
+          ctable
+          jedi
+          concurrent
+          company
+          cyberpunk-theme
+          elpy 
+          yasnippet
+          pyvenv
+          highlight-indentation
+          find-file-in-project 
+          sql-indent
+          sql
+          exec-path-from-shell
+          iedit
+          projectile
+          auctex
+          auto-complete
+          popup
+          let-alist
+          magit
+          minimap
+          popup
+          rust-mode
+          python-mode
+          doom-themes
+          compat
+  	cond-let
+  	llama
+  	seq
+  	transient
+  	with-editor))
 
-                ;; Install any missing packages.
-                (dolist (package package-list)
-                  (unless (package-installed-p package)
-                    (package-install package)))  
+  ;; Install any missing packages.
+  (dolist (package package-list)
+    (unless (package-installed-p package)
+      (package-install package)))  
 #+END_SRC
 
 * Personal Preferences
