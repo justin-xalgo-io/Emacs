@@ -60,11 +60,11 @@
           python-mode
           doom-themes
           compat
-  	cond-let
-  	llama
-  	seq
-  	transient
-  	with-editor))
+          cond-let
+          llama
+          seq
+          transient
+          with-editor))
 
   ;; Install any missing packages.
   (dolist (package package-list)
