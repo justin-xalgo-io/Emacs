@@ -26,44 +26,50 @@
 
 ** Required Packages
 #+BEGIN_SRC emacs-lisp
-  ;; List required packages.
-  (setq package-list
-        '(python-environment
-          move-text
-          flyspell-correct
-          deferred
-          epc 
-          flycheck
-          ctable
-          jedi
-          concurrent
-          company
-          cyberpunk-theme
-          elpy 
-          yasnippet
-          pyvenv
-          highlight-indentation
-          find-file-in-project 
-          sql-indent
-          sql
-          exec-path-from-shell
-          iedit
-          projectile
-          auctex
-          auto-complete
-          popup
-          let-alist
-          magit
-          minimap
-          popup
-          rust-mode
-          python-mode
-          doom-themes))
-  
-  ;; Install any missing packages.
-  (dolist (package package-list)
-    (unless (package-installed-p package)
-      (package-install package)))  
+              ;; List required packages.
+              (setq package-list
+                    '(python-environment
+                      move-text
+                      flyspell-correct
+                      deferred
+                      epc 
+                      flycheck
+                      ctable
+                      jedi
+                      concurrent
+                      company
+                      cyberpunk-theme
+                      elpy 
+                      yasnippet
+                      pyvenv
+                      highlight-indentation
+                      find-file-in-project 
+                      sql-indent
+                      sql
+                      exec-path-from-shell
+                      iedit
+                      projectile
+                      auctex
+                      auto-complete
+                      popup
+                      let-alist
+                      magit
+                      minimap
+                      popup
+                      rust-mode
+                      python-mode
+                      doom-themes
+            	      compat
+          	      cond-let
+                      llama
+      	              seq
+    	              transient
+  	            with-editor))
+
+              ;; Install any missing packages.
+              (dolist (package package-list)
+                (unless (package-installed-p package)
+                  (package-install package)))  
 #+END_SRC
 
 * Personal Preferences
@@ -153,39 +159,3 @@
 #+END_SRC
 
 *** LaTeX
-#+BEGIN_SRC emacs-lisp
-  ;; LaTeX settings & hooks.
-  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)  	; With AUCTeX LaTeX mode.
-  (add-hook 'latex-mode-hook 'turn-on-reftex)   	; With Emacs LaTeX mode.
-#+END_SRC
-
-* User Defined Functions
-** Keyboard Helpers
-#+BEGIN_SRC emacs-lisp
-  ;; Interactive function that accepts a character's hex value and outputs the corresponding character to the screen.
-  (defun insert-char-4 ()
-  "Read 4 keyboard inputs, interpret it as a hexadecimal number, and insert it as a character."
-  (interactive)
-  (let* ((k1 (read-key-sequence "____"))
-         (k2 (read-key-sequence (concat k1 "___")))
-         (k3 (read-key-sequence (concat k1 k2 "__")))
-         (k4 (read-key-sequence (concat k1 k2 k3 "_")))
-         (charcode (cl-parse-integer (concat k1 k2 k3 k4) :radix 16)))
-    (insert-char charcode)
-    (message (concat k1 k2 k3 k4 " => " (char-to-string charcode)))))
-
-  (defun insert-v-bar ()
-    (interactive)
-    (insert-char (cl-parse-integer "007C" :radix 16)))
-#+END_SRC
-
-* Development Setup
-** Babel Settings
-#+BEGIN_SRC emacs-lisp
-  (setq org-bable-python-command "python3")	; Using python3, not python.
-
-  (org-babel-do-load-languages			; Load babel languages.
-    'org-babel-load-languages
-      '((python . t)
-        (shell . t)))  
-#+END_SRC
