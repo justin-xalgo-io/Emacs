@@ -30,7 +30,6 @@
   (setq package-list
         '(python-environment
           move-text
-          flyspell-correct
           deferred
           epc 
           flycheck
@@ -69,7 +68,14 @@
   ;; Install any missing packages.
   (dolist (package package-list)
     (unless (package-installed-p package)
-      (package-install package)))  
+      (package-install package)))
+
+  ;; Download Pgmacs from git.
+  (unless (package-installed-p 'pg)
+    (package-vc-install "https://github.com/emarsden/pg-el" nil nil 'pg))
+  (unless (package-installed-p 'pgmacs)
+    (package-vc-install "https://github.com/emarsden/pgmacs" nil nil 'pgmacs))
+  (require 'pgmacs)   
 #+END_SRC
 
 * Personal Preferences
@@ -136,28 +142,6 @@
   (doom-themes-org-config))
 #+END_SRC
 
-*** Flyspell
-#+BEGIN_SRC emacs-lisp
-  (use-package flyspell
-    :custom
-    (ispell-program-name "aspell")
-    ;; Default dictionary. To change do M-x ispell-change-dictionary RET.
-    (aspell-dictionary "en_GB-ise-wo_accents")
-    (aspell-program-name "/usr/bin/aspell")
-    (ispell-dictionary "en_GB-ise-wo_accents")
-    (ispell-program-name "/usr/bin/aspell")
-    :config
-    (define-key flyspell-mode-map [down-mouse-3] 'flyspell-correct-word)
-    (add-hook 'org-mode-hook 'flyspell-mode)
-    ;; Enable Flyspell mode for TeX modes such as AUCTeX. Highlights all misspelled words.
-    (add-hook 'TeX-mode-hook 'flyspell-mode)
-    ;; Enable Flyspell program mode for emacs lisp mode, which highlights all misspelled words in comments and strings.
-    (add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode))
-
-  (use-package flyspell-correct
-    :bind ("C-;" . flyspell-correct-wrapper))
-#+END_SRC
-
 *** LaTeX
 
 * Elisp Methods
@@ -174,7 +158,17 @@
       (insert-char charcode)
       (message (concat k1 k2 k3 k4 " => " (char-to-string charcode)))))
 
-  (defun insert-v-bar ()
+  (defun insert-vert ()
     (interactive)
     (insert-char 124))
+
+  (defun insert-sqr ()
+    (interactive)
+    (insert-char 91)
+    (insert-char 93))
+
+  (defun insert-curls ()
+    (interactive)
+    (insert-char 123)
+    (insert-char 125))
 #+END_SRC
