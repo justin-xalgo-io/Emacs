@@ -196,10 +196,10 @@
   (defun create-aws-session-cmd (db-version)
     (let 
       ((cmd "aws ssm start-session \
-	     --profile xalgo_admin_%s \
-	     --target %s \
-	     --document-name AWS-StartPortForwardingSessionToRemoteHost \
-	     --parameters '{\"host\":[\"%s\"],\"portNumber\":[\"5432\"], \"localPortNumber\":[\"25432\"]}'"))
+	   --profile xalgo_admin_%s \
+	   --target %s \
+	   --document-name AWS-StartPortForwardingSessionToRemoteHost \
+	   --parameters '{\"host\":[\"%s\"],\"portNumber\":[\"5432\"], \"localPortNumber\":[\"25432\"]}'"))
       (cond
 	((equal db-version 'staging) (apply 'format cmd (list (symbol-name db-version) aws-staging-target aws-staging-host)))
 	((equal db-version 'production) (apply 'format cmd (list (symbol-name db-version) aws-production-target aws-production-host)))
