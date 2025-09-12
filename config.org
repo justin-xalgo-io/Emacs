@@ -175,7 +175,13 @@
 
 * Terminal Commands
 ** AWS Connections
+*** Data Mapper PostgreSql Database
 #+BEGIN_SRC emacs-lisp
+  (defconst postgres-us "developer")
+  (defconst staging-postgres-pw "")
+  (defconst production-postgres-pw "mkIzeDGDw3fV7BU5Cg=LAvfVOH99EY")
+  (defconst development-postgres-pw "TdbzMudS3Q1CzZI3ug,y=Niics08cS")
+    
   (defconst aws-staging-target "i-061d161a45675bcba")
   (defconst aws-production-target "i-00048a203eb776fcf")
   (defconst aws-development-target "i-0f2d68a58861f5886")
@@ -188,23 +194,31 @@
     (let
       ((db-version-str-cl (downcase (string-trim db-version-str))))
       (cond
-	((equal db-version-str-cl "staging") 'staging)
-	((equal db-version-str-cl "production") 'production)
-	((equal db-version-str-cl "development") 'development)
-	(t nil))))
+  	((equal db-version-str-cl "staging") 'staging)
+  	((equal db-version-str-cl "production") 'production)
+  	((equal db-version-str-cl "development") 'development)
+  	(t nil))))
+
+  (defun create-postgres-uri (db-version)
+    (let
+      ((url "postgres://%s:%s@localhost:25432/data_mapper"))    
+      (cond
+        ((equal db-version 'staging) (apply 'format url (list postgres-us staging-postgres-pw)))
+        ((equal db-version 'production) (apply 'format url (list postgres-us production-postgres-pw)))
+        ((equal db-version 'development) (apply 'format url (list postgres-us development-postgres-pw))))))
 
   (defun create-aws-session-cmd (db-version)
     (let 
       ((cmd "aws ssm start-session \
-	   --profile xalgo_admin_%s \
-	   --target %s \
-	   --document-name AWS-StartPortForwardingSessionToRemoteHost \
-	   --parameters '{\"host\":[\"%s\"],\"portNumber\":[\"5432\"], \"localPortNumber\":[\"25432\"]}'"))
+  	   --profile xalgo_admin_%s \
+  	   --target %s \
+  	   --document-name AWS-StartPortForwardingSessionToRemoteHost \
+  	   --parameters '{\"host\":[\"%s\"],\"portNumber\":[\"5432\"], \"localPortNumber\":[\"25432\"]}'"))
       (cond
-	((equal db-version 'staging) (apply 'format cmd (list (symbol-name db-version) aws-staging-target aws-staging-host)))
-	((equal db-version 'production) (apply 'format cmd (list (symbol-name db-version) aws-production-target aws-production-host)))
-	((equal db-version 'development) (apply 'format cmd (list (symbol-name db-version) aws-development-target aws-development-host)))
-	(t nil))))
+  	((equal db-version 'staging) (apply 'format cmd (list (symbol-name db-version) aws-staging-target aws-staging-host)))
+  	((equal db-version 'production) (apply 'format cmd (list (symbol-name db-version) aws-production-target aws-production-host)))
+  	((equal db-version 'development) (apply 'format cmd (list (symbol-name db-version) aws-development-target aws-development-host)))
+  	(t nil))))
 
   (defun connect-data-mapper (db-version-str)
     "Ask which data_mapper database version to connect to (production, development or staging) and connect via AWS session."
@@ -219,5 +233,6 @@
 	  (let
 	    ((aws-cmd (create-aws-session-cmd db-version)))
 	    (shell-command "aws sso login")
-	    (shell-command aws-cmd))))))
+	    (async-shell-command aws-cmd)
+	    (pgmacs-open (pg-connect/uri (create-postgres-uri db-version))))))))
 #+END_SRC
