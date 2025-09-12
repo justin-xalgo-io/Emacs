@@ -12,73 +12,195 @@
 
   (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
-  ; Activate all the packages.
+  ;; Activate all the packages.
   (package-initialize)
 
-  ; Fetch the list of available packages. 
+  ;; Fetch the list of available packages. 
   (unless package-archive-contents
     (package-refresh-contents))
 
-  ; Initialize use-package on non-Linux platforms.
+  ;; Initialize use-package on non-Linux platforms.
   (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
     (package-install 'use-package))
+
+  (require 'use-package)
 #+END_SRC
 
 ** Required Packages
+*** General Packages
 #+BEGIN_SRC emacs-lisp
   ;; List required packages.
   (setq package-list
-        '(python-environment
-          move-text
-          deferred
-          epc 
-          flycheck
-          ctable
-          jedi
-          concurrent
-          company
-          cyberpunk-theme
-          elpy 
-          yasnippet
-          pyvenv
-          highlight-indentation
-          find-file-in-project 
-          sql-indent
-          sql
-          exec-path-from-shell
-          iedit
-          projectile
-          auctex
-          auto-complete
-          popup
-          let-alist
-          magit
-          minimap
-          popup
-          rust-mode
-          python-mode
-          doom-themes
-          compat
-          cond-let
-          llama
-          seq
-          transient
-          with-editor))
+	'(python-environment
+	  move-text
+	  deferred
+	  epc 
+	  ctable
+	  jedi
+	  concurrent
+	  company
+	  cyberpunk-theme
+	  elpy 
+	  pyvenv
+	  highlight-indentation
+	  find-file-in-project 
+	  sql-indent
+	  sql
+	  exec-path-from-shell
+	  iedit
+	  projectile
+	  auctex
+	  auto-complete
+	  popup
+	  let-alist
+	  magit
+	  minimap
+	  popup
+	  rust-mode
+	  python-mode
+	  doom-themes
+	  compat
+	  cond-let
+	  llama
+	  seq
+	  transient
+	  with-editor))
 
   ;; Install any missing packages.
   (dolist (package package-list)
     (unless (package-installed-p package)
       (package-install package)))
 
+  ;; Enable defer and ensure by default for use-package.
+  ;; Keep auto-save/backup files separate from source code: https://github.com/scalameta/metals/issues/1027
+  (setq use-package-always-defer t
+    use-package-always-ensure t
+    backup-directory-alist `((".*" . ,temporary-file-directory))
+    auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))  
+#+END_SRC
+
+*** Doom Themes Package
+#+BEGIN_SRC emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :demand t
+  :custom
+
+  ;; Global settings (defaults).
+  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  ;; For treemacs users.
+  (doom-themes-treemacs-theme "doom-gruvbox") ; use "doom-colors" for less minimal icon theme
+
+  :config
+  (load-theme 'doom-bluloco-dark t)
+
+  ;; Enable flashing mode-line on errors.
+  (doom-themes-visual-bell-config)
+
+  ;; Enable custom neotree theme (nerd-icons must be installed!)
+  (doom-themes-neotree-config)
+
+  ;; or for treemacs users.
+  (doom-themes-treemacs-config)
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+#+END_SRC
+
+*** Postgres Packages
+#+BEGIN_SRC emacs-lisp
   ;; Download Pgmacs from git.
   (unless (package-installed-p 'pg)
     (package-vc-install "https://github.com/emarsden/pg-el" nil nil 'pg))
   (unless (package-installed-p 'pgmacs)
     (package-vc-install "https://github.com/emarsden/pgmacs" nil nil 'pgmacs))
-  (require 'pgmacs)   
+  (require 'pgmacs)  
+#+END_SRC
+
+*** Scala Metals Packages
+#+BEGIN_SRC emacs-lisp  
+  ;; Enable scala-mode for highlighting, indentation and motion commands.
+  (use-package scala-mode
+    :interpreter ("scala" . scala-mode))
+
+  ;; Enable sbt mode for executing sbt commands.
+  (use-package sbt-mode
+    :commands sbt-start sbt-command
+    :config
+    ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+    ;; allows using SPACE when in the minibuffer
+    (substitute-key-definition
+     'minibuffer-complete-word
+     'self-insert-command
+     minibuffer-local-completion-map)
+     ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+     (setq sbt:program-options '("-Dsbt.supershell=false")))
+
+  ;; Enable nice rendering of diagnostics like compile errors.
+  (use-package flycheck
+    :init (global-flycheck-mode))
+
+  (use-package lsp-mode
+    ;; Optional - enable lsp-mode automatically in scala files.
+    ;; You could also swap out lsp for lsp-deffered in order to defer loading.
+    :hook  (scala-mode . lsp)
+  	   (lsp-mode . lsp-lens-mode)
+    :config
+    ;; Uncomment following section if you would like to tune lsp-mode performance according to
+    ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
+    ;; (setq gc-cons-threshold 100000000) ;; 100mb
+    ;; (setq read-process-output-max (* 1024 1024)) ;; 1mb
+    ;; (setq lsp-idle-delay 0.500)
+    ;; (setq lsp-log-io nil)
+    ;; (setq lsp-completion-provider :capf)
+    (setq lsp-prefer-flymake nil)
+    ;; Makes LSP shutdown the metals server when all buffers in the project are closed.
+    ;; https://emacs-lsp.github.io/lsp-mode/page/settings/mode/#lsp-keep-workspace-alive
+    (setq lsp-keep-workspace-alive nil))
+
+  ;; Add metals backend for lsp-mode.
+  (use-package lsp-metals)
+
+  ;; Enable nice rendering of documentation on hover.
+  ;;   Warning: on some systems this package can reduce your emacs responsiveness significally.
+  ;;   (See: https://emacs-lsp.github.io/lsp-mode/page/performance/)
+  ;;   In that case you have to not only disable this but also remove from the packages since
+  ;;   lsp-mode can activate it automatically.
+  (use-package lsp-ui)
+
+  ;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
+  ;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
+  ;; to avoid odd behavior with snippets and indentation.
+  (use-package yasnippet)
+
+  ;; Use company-capf as a completion provider.
+  ;;
+  ;; To Company-lsp users:
+  ;;   Company-lsp is no longer maintained and has been removed from MELPA.
+  ;;   Please migrate to company-capf.
+  (use-package company
+    :hook (scala-mode . company-mode)
+    :config
+    (setq lsp-completion-provider :capf))
+
+  ;; Posframe is a pop-up tool that must be manually installed for dap-mode.
+  (use-package posframe)
+
+  ;; Use the Debug Adapter Protocol for running tests and debugging.
+  (use-package dap-mode
+    :hook
+    (lsp-mode . dap-mode)
+    (lsp-mode . dap-ui-mode))
 #+END_SRC
 
 * Personal Preferences
+** Packages Configuration
+#+BEGIN_SRC emacs-lisp
+  (setq flycheck-global-modes nil)
+#+END_SRC
 ** Basic UI Configuration
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-message t)
@@ -112,41 +234,8 @@
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 #+END_SRC
 
-** Package Preferences
-*** Doom Themes
-#+BEGIN_SRC emacs-lisp
-(use-package doom-themes
-  :ensure t
-  :custom
-
-  ;; Global settings (defaults).
-  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
-  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-
-  ;; For treemacs users.
-  (doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-
-  :config
-  (load-theme 'doom-bluloco-dark t)
-
-  ;; Enable flashing mode-line on errors.
-  (doom-themes-visual-bell-config)
-
-  ;; Enable custom neotree theme (nerd-icons must be installed!)
-  (doom-themes-neotree-config)
-
-  ;; or for treemacs users.
-  (doom-themes-treemacs-config)
-
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-#+END_SRC
-
-*** LaTeX
-
 * Elisp Methods
 #+BEGIN_SRC emacs-lisp
-
   (defun insert-char-4 ()
     "Read 4 keyboard inputs, interpret it as a hexadecimal number, and insert it as a character."
     (interactive)
@@ -225,14 +314,15 @@
     (interactive "sEnter database version: ")
     (let
       ((db-version (db-version-str-to-symbol db-version-str)))
-      (if
-	(eq db-version nil)
-	(message "Bad database version: '%s'" db-version-str)
-	(progn
-	  (message ". . . logging into '%s' data_mapper database." db-version)
-	  (let
-	    ((aws-cmd (create-aws-session-cmd db-version)))
-	    (shell-command "aws sso login")
-	    (async-shell-command aws-cmd)
-	    (pgmacs-open (pg-connect/uri (create-postgres-uri db-version))))))))
+	(if
+	  (eq db-version nil)
+	  (message "Bad database version: '%s'" db-version-str)
+	  (progn
+	    (message ". . . logging into '%s' data_mapper database." db-version)
+	    (let
+	      ((aws-cmd (create-aws-session-cmd db-version)))
+	      (shell-command "aws sso login")
+	      (async-shell-command aws-cmd)
+              (sleep-for 5 0)
+	      (pgmacs-open (pg-connect/uri (create-postgres-uri db-version))))))))
 #+END_SRC
