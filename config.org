@@ -141,6 +141,7 @@
 *** Python
 #+BEGIN_SRC emacs-lisp
   (setup (:package python-mode))
+  (setup (:package elpy))
 #+END_SRC
 
 *** Clojure
