@@ -33,6 +33,208 @@
   (load custom-file 'noerror)
 #+END_SRC
 
+* Packages
+** General
+*** Navigation
+#+BEGIN_SRC emacs-lisp
+
+  ;; These customizations make it easier for you to navigate files,
+  ;; switch buffers, and choose options from the minibuffer.
+
+  ;; which-key is the best feature for the discoverability and
+  ;; usability of Emacs. When you start a key sequence, e.g. C-x,
+  ;; a menu opens up that shows you what all your next options
+  ;; are. It's a great way to find out what's in Emacs, and it
+  ;; helps transfer commands from your short-term memory to
+  ;; your long-term memory and (finally) your muscle memory.
+  (setup (:package which-key)
+    (which-key-mode)
+    (:option which-key-idle-delay 0.3))
+
+  ;; Ivy is the completion framework. This makes M-x much more usable.
+  ;; Installing counsel brings ivy and swiper as dependencies
+  ;; swiper is a powerful search-within-a-buffer capability.
+  (setup (:package counsel)
+    (ivy-mode)
+    (:option ivy-use-virtual-buffers t
+	     ivy-re-builders-alist '((t . ivy--regex-ignore-order))
+	     ivy-count-format "%d/%d ")
+    (:global "C-s" swiper
+	     "s-f" swiper
+	     "C-x C-f" counsel-find-file
+	     "C-x C-b" counsel-switch-buffer
+	     "M-x" counsel-M-x))
+
+  ;; Add ivy-rich-mode adds docstrings and additional metadata
+  ;; in the ivy picker minibuffer
+  (setup (:package ivy-rich)
+    (ivy-rich-mode))
+#+END_SRC
+
+*** Shell Integration
+#+BEGIN_SRC emacs-lisp
+
+  ;; Sets up exec-path-from shell.
+  (setup 
+    (when (memq window-system '(mac ns))
+      (:package exec-path-from-shell)
+      (exec-path-from-shell-initialize)))  
+#+END_SRC
+
+*** Magit
+#+BEGIN_SRC emacs-lisp
+
+  ;; Magit is a full-fledged interface for git.
+  (add-to-list 'package-pinned-packages '(magit . "melpa-stable") t)
+  (setup (:package magit)
+    (:global "C-M-;" magit-status))
+#+END_SRC
+
+*** Projects
+#+BEGIN_SRC emacs-lisp
+
+  ;; Projectile is another amazing package from the
+  ;; creator of CIDER. It's got lots of commands
+  ;; for searching and managing files in a project.
+  (setup (:package projectile)
+    (projectile-mode +1)
+    (:bind "s-p" projectile-command-map
+	   "C-c p" projectile-command-map))
+
+  ;; Counsel-projectile integrates projectile with
+  ;; counsel's browse-and-select UI.
+  (setup (:package counsel-projectile))
+#+END_SRC
+*** File Tree
+#+BEGIN_SRC emacs-lisp
+
+  ;; Treemacs is a tree layout file explorer.
+  (setup (:package treemacs treemacs-projectile treemacs-magit)
+    (:global "M-0" treemacs-select-window
+	     "M-o" ace-window ;; treemacs brings ace-window as a dependency
+	     "s-b" treemacs))
+#+END_SRC
+*** Elisp Editing
+#+BEGIN_SRC emacs-lisp
+
+  ;; Paredit enables structural editing of just about any lisp.
+  (setup (:package paredit)
+    (:hook-into emacs-lisp-mode
+		eval-expression-minibuffer-setup
+		ielm-mode
+		lisp-mode
+		lisp-interaction-mode
+		scheme-mode))
+
+  (setup turn-on-eldoc-mode
+    (:hook-into emacs-lisp-mode
+	   lisp-interaction-mode
+	   iel-mode))
+
+  ;; Rainbow-delimiters makes nested parentheses easier to
+  ;; follow by showing each pair in its own color.
+  (setup (:package rainbow-delimiters)
+    (:hook-into prog-mode))
+#+END_SRC
+
+** Languages
+*** Python
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+
+*** Clojure
+#+BEGIN_SRC emacs-lisp
+
+  ;; See:  https://clojure-lsp.io/
+  ;; also: https://emacs-lsp.github.io/lsp-mode/
+  (setup (:package lsp-mode lsp-ui lsp-ivy lsp-treemacs)
+    (:hook lsp-enable-which-key-integration)
+    (:bind "M-<f7>" lsp-find-references))
+
+  ;; Clojure-mode is (naturally) the major mode for editing
+  ;; Clojure and ClojureScript. subword-mode allows words
+  ;; in camel case to be treated as separate words for
+  ;; movement and editing commands:
+  ;; https://github.com/clojure-emacs/clojure-mode
+  ;; subword-mode is useful for working with camel-case tokens,
+  ;; like names of Java classes (e.g. JavaClassName).
+  (setup (:package clojure-mode)
+    (:hook subword-mode
+	   paredit-mode
+	   lsp))
+
+  ;; CIDER is a whole interactive development environment for
+  ;; Clojure. There is a ton of functionality here, so be sure
+  ;; to check out the excellent documentation at:
+  ;; https://docs.cider.mx/cider/index.html
+  (setup (:package cider)
+    (:bind "C-c u" cider-user-ns
+	   "C-M-r" cider-refresh)
+    (:option cider-show-error-buffer t
+	     cider-auto-select-error-buffer t
+	     cider-repl-history-file "~/.emacs.d/cider-history"
+	     cider-repl-pop-to-buffer-on-connect t
+	     cider-repl-wrap-history t))
+
+  ;; Company provides auto-completion for CIDER:
+  ;; see https://docs.cider.mx/cider/usage/code_completion.html
+  (setup (:package company)
+    (:hook-into cider-mode
+		cider-repl-mode))
+
+  ;; Hydra provides a nice looking menu for commands
+  ;; to see what's available, use M-x and the prefix cider-hydra:
+  ;; https://github.com/clojure-emacs/cider-hydra
+  (setup (:package cider-hydra)
+    (:hook-into clojure-mode))
+
+  ;; Additional refactorings for CIDER
+  ;; e.g. add missing libspec, extract function, destructure keys:
+  ;; https://github.com/clojure-emacs/clj-refactor.el
+  (setup (:package clj-refactor)
+    (cljr-add-keybindings-with-prefix "C-c C-m")
+    (:hook-into clojure-mode))
+
+  ;; Enable paredit in your REPL.
+  (setup cider-repl-mode
+    (:hook paredit-mode))
+
+  ;; Use clojure mode for other extensions.
+  (add-to-list 'auto-mode-alist '("\\.boot$" . clojure-mode))
+  (add-to-list 'auto-mode-alist '("\\.cljs.*$" . clojure-mode))
+  (add-to-list 'auto-mode-alist '("lein-env" . enh-ruby-mode))
+
+  ;; These help me out with the way I usually develop web apps.
+  (defun cider-start-http-server ()
+    (interactive)
+    (cider-load-buffer)
+    (let ((ns (cider-current-ns)))
+      (cider-repl-set-ns ns)
+      (cider-interactive-eval (format "(println '(def server (%s/start))) (println 'server)" ns))
+      (cider-interactive-eval (format "(def server (%s/start)) (println server)" ns))))
+
+  (defun cider-refresh ()
+    (interactive)
+    (cider-interactive-eval (format "(user/reset)")))
+
+  (defun cider-user-ns ()
+    (interactive)
+    (cider-repl-set-ns "user"))
+#+END_SRC
+
+** Databases
+*** Postgres 
+#+BEGIN_SRC emacs-lisp
+
+  ;; Download Pgmacs from git.
+  (unless (package-installed-p 'pg)
+    (package-vc-install "https://github.com/emarsden/pg-el" nil nil 'pg))
+  (unless (package-installed-p 'pgmacs)
+    (package-vc-install "https://github.com/emarsden/pgmacs" nil nil 'pgmacs))
+  (require 'pgmacs)  
+#+END_SRC
+
 * UI Customization
 #+BEGIN_SRC emacs-lisp
 
@@ -178,7 +380,8 @@
 #+END_SRC
 
 * Elisp Functions
-** Insertion
+** Keyboard Utilities
+*** Character Insertions
 #+BEGIN_SRC emacs-lisp
 
   (defun insert-char-4 ()
@@ -205,202 +408,6 @@
     (interactive)
     (insert-char 123)
     (insert-char 125))
-#+END_SRC
-
-* Packages
-** Navigation
-#+BEGIN_SRC emacs-lisp
-
-  ;; These customizations make it easier for you to navigate files,
-  ;; switch buffers, and choose options from the minibuffer.
-
-  ;; which-key is the best feature for the discoverability and
-  ;; usability of Emacs. When you start a key sequence, e.g. C-x,
-  ;; a menu opens up that shows you what all your next options
-  ;; are. It's a great way to find out what's in Emacs, and it
-  ;; helps transfer commands from your short-term memory to
-  ;; your long-term memory and (finally) your muscle memory.
-  (setup (:package which-key)
-    (which-key-mode)
-    (:option which-key-idle-delay 0.3))
-
-  ;; Ivy is the completion framework. This makes M-x much more usable.
-  ;; Installing counsel brings ivy and swiper as dependencies
-  ;; swiper is a powerful search-within-a-buffer capability.
-  (setup (:package counsel)
-    (ivy-mode)
-    (:option ivy-use-virtual-buffers t
-	     ivy-re-builders-alist '((t . ivy--regex-ignore-order))
-	     ivy-count-format "%d/%d ")
-    (:global "C-s" swiper
-	     "s-f" swiper
-	     "C-x C-f" counsel-find-file
-	     "C-x C-b" counsel-switch-buffer
-	     "M-x" counsel-M-x))
-
-  ;; Add ivy-rich-mode adds docstrings and additional metadata
-  ;; in the ivy picker minibuffer
-  (setup (:package ivy-rich)
-    (ivy-rich-mode))
-#+END_SRC
-
-** Shell Integration
-#+BEGIN_SRC emacs-lisp
-
-  ;; Sets up exec-path-from shell.
-  (setup 
-    (when (memq window-system '(mac ns))
-      (:package exec-path-from-shell)
-      (exec-path-from-shell-initialize)))  
-#+END_SRC
-
-** File Tree
-#+BEGIN_SRC emacs-lisp
-
-  ;; Treemacs is a tree layout file explorer.
-  (setup (:package treemacs treemacs-projectile treemacs-magit)
-    (:global "M-0" treemacs-select-window
-	     "M-o" ace-window ;; treemacs brings ace-window as a dependency
-	     "s-b" treemacs))
-#+END_SRC
-
-** Elisp Editing
-#+BEGIN_SRC emacs-lisp
-
-  ;; Paredit enables structural editing of just about any lisp.
-  (setup (:package paredit)
-    (:hook-into emacs-lisp-mode
-		eval-expression-minibuffer-setup
-		ielm-mode
-		lisp-mode
-		lisp-interaction-mode
-		scheme-mode))
-
-  (setup turn-on-eldoc-mode
-    (:hook-into emacs-lisp-mode
-	   lisp-interaction-mode
-	   iel-mode))
-
-  ;; Rainbow-delimiters makes nested parentheses easier to
-  ;; follow by showing each pair in its own color.
-  (setup (:package rainbow-delimiters)
-    (:hook-into prog-mode))
-#+END_SRC
-
-** Magit
-#+BEGIN_SRC emacs-lisp
-
-  ;; Magit is a full-fledged interface for git.
-  (add-to-list 'package-pinned-packages '(magit . "melpa-stable") t)
-  (setup (:package magit)
-    (:global "C-M-;" magit-status))
-#+END_SRC
-
-** Projects
-#+BEGIN_SRC emacs-lisp
-
-  ;; Projectile is another amazing package from the
-  ;; creator of CIDER. It's got lots of commands
-  ;; for searching and managing files in a project.
-  (setup (:package projectile)
-    (projectile-mode +1)
-    (:bind "s-p" projectile-command-map
-	   "C-c p" projectile-command-map))
-
-  ;; Counsel-projectile integrates projectile with
-  ;; counsel's browse-and-select UI.
-  (setup (:package counsel-projectile))
-#+END_SRC
-
-** Clojure
-#+BEGIN_SRC emacs-lisp
-
-  ;; See:  https://clojure-lsp.io/
-  ;; also: https://emacs-lsp.github.io/lsp-mode/
-  (setup (:package lsp-mode lsp-ui lsp-ivy lsp-treemacs)
-    (:hook lsp-enable-which-key-integration)
-    (:bind "M-<f7>" lsp-find-references))
-
-  ;; Clojure-mode is (naturally) the major mode for editing
-  ;; Clojure and ClojureScript. subword-mode allows words
-  ;; in camel case to be treated as separate words for
-  ;; movement and editing commands:
-  ;; https://github.com/clojure-emacs/clojure-mode
-  ;; subword-mode is useful for working with camel-case tokens,
-  ;; like names of Java classes (e.g. JavaClassName).
-  (setup (:package clojure-mode)
-    (:hook subword-mode
-	   paredit-mode
-	   lsp))
-
-  ;; CIDER is a whole interactive development environment for
-  ;; Clojure. There is a ton of functionality here, so be sure
-  ;; to check out the excellent documentation at:
-  ;; https://docs.cider.mx/cider/index.html
-  (setup (:package cider)
-    (:bind "C-c u" cider-user-ns
-	   "C-M-r" cider-refresh)
-    (:option cider-show-error-buffer t
-	     cider-auto-select-error-buffer t
-	     cider-repl-history-file "~/.emacs.d/cider-history"
-	     cider-repl-pop-to-buffer-on-connect t
-	     cider-repl-wrap-history t))
-
-  ;; Company provides auto-completion for CIDER:
-  ;; see https://docs.cider.mx/cider/usage/code_completion.html
-  (setup (:package company)
-    (:hook-into cider-mode
-		cider-repl-mode))
-
-  ;; Hydra provides a nice looking menu for commands
-  ;; to see what's available, use M-x and the prefix cider-hydra:
-  ;; https://github.com/clojure-emacs/cider-hydra
-  (setup (:package cider-hydra)
-    (:hook-into clojure-mode))
-
-  ;; Additional refactorings for CIDER
-  ;; e.g. add missing libspec, extract function, destructure keys:
-  ;; https://github.com/clojure-emacs/clj-refactor.el
-  (setup (:package clj-refactor)
-    (cljr-add-keybindings-with-prefix "C-c C-m")
-    (:hook-into clojure-mode))
-
-  ;; Enable paredit in your REPL.
-  (setup cider-repl-mode
-    (:hook paredit-mode))
-
-  ;; Use clojure mode for other extensions.
-  (add-to-list 'auto-mode-alist '("\\.boot$" . clojure-mode))
-  (add-to-list 'auto-mode-alist '("\\.cljs.*$" . clojure-mode))
-  (add-to-list 'auto-mode-alist '("lein-env" . enh-ruby-mode))
-
-  ;; These help me out with the way I usually develop web apps.
-  (defun cider-start-http-server ()
-    (interactive)
-    (cider-load-buffer)
-    (let ((ns (cider-current-ns)))
-      (cider-repl-set-ns ns)
-      (cider-interactive-eval (format "(println '(def server (%s/start))) (println 'server)" ns))
-      (cider-interactive-eval (format "(def server (%s/start)) (println server)" ns))))
-
-  (defun cider-refresh ()
-    (interactive)
-    (cider-interactive-eval (format "(user/reset)")))
-
-  (defun cider-user-ns ()
-    (interactive)
-    (cider-repl-set-ns "user"))
-#+END_SRC
-
-** Postgres 
-#+BEGIN_SRC emacs-lisp
-
-  ;; Download Pgmacs from git.
-  (unless (package-installed-p 'pg)
-    (package-vc-install "https://github.com/emarsden/pg-el" nil nil 'pg))
-  (unless (package-installed-p 'pgmacs)
-    (package-vc-install "https://github.com/emarsden/pgmacs" nil nil 'pgmacs))
-  (require 'pgmacs)  
 #+END_SRC
 
 * AWS Utilities
