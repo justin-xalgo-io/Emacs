@@ -140,7 +140,7 @@
 ** Languages
 *** Python
 #+BEGIN_SRC emacs-lisp
-
+  (setup (:package python-mode))
 #+END_SRC
 
 *** Clojure
