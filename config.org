@@ -140,8 +140,23 @@
 ** Languages
 *** Python
 #+BEGIN_SRC emacs-lisp
+
+  ;; Setup packages.
   (setup (:package python-mode))
+  ;;  (:hook elpy-mode))
   (setup (:package elpy))
+  (setup (:package pyenv-mode))
+
+  ;; Setup python for 
+  (require 'pyenv-mode)
+  (defun projectile-pyenv-mode-set ()
+    "Set pyenv version matching project name."
+    (let ((project (projectile-project-name)))
+      (if (member project (pyenv-mode-versions))
+          (pyenv-mode-set project)
+        (pyenv-mode-unset))))
+
+  (add-hook 'projectile-after-switch-project-hook 'projectile-pyenv-mode-set)
 #+END_SRC
 
 *** Clojure
@@ -245,12 +260,18 @@
       (tool-bar-mode -1)                ;; The toolbar is pretty ugly.
       (scroll-bar-mode -1)))            ;; Disable visible scrollbar.
 
-  (blink-cursor-mode 0)             ;; Turn off blinking cursor. distracting!
-  (setq create-lockfiles nil)       ;; No need for ~ files when editing.
-  (fset 'yes-or-no-p 'y-or-n-p)     ;; Changes all yes/no questions to y/n type.
-  (setq inhibit-startup-message t)  ;; Go straight to scratch buffer on startup.
-  (setq ring-bell-function 'ignore) ;; Turn off audible bell.
+  (blink-cursor-mode 0)                 ;; Turn off blinking cursor. distracting!
+  (setq create-lockfiles nil)           ;; No need for ~ files when editing.
+  (fset 'yes-or-no-p 'y-or-n-p)         ;; Changes all yes/no questions to y/n type.
+  (setq inhibit-startup-message t)      ;; Go straight to scratch buffer on startup.
+  (setq ring-bell-function 'ignore)     ;; Turn off audible bell.
+  (put 'scroll-left 'disabled nil)      ;; Allowing horizontal scrolling.
 
+  ;; Scrolling.
+  (setq mouse-wheel-tilt-scroll t)
+  (setq scroll-conservatively 101)
+  (pixel-scroll-mode t)
+  
   ;; Show full path in title bar.
   (setq-default frame-title-format "%b (%f)")
 
@@ -274,8 +295,8 @@
 
   ;; For some reason, this crashes Emacs on Windows. Argh!
   (setup (when (not (string-equal system-type "windows-nt"))
-	   (:package doom-modeline)
-	   (doom-modeline-mode t)))
+           (:package doom-modeline)
+           (doom-modeline-mode t)))
 
   (setup (:package doom-themes)
     (when (not custom-enabled-themes)
@@ -283,26 +304,45 @@
 
   ;; These settings relate to how emacs interacts with your operating system.
   (setq ;; makes killing/yanking interact with the clipboard
-	x-select-enable-clipboard t
+        x-select-enable-clipboard t
 
-	;; I'm actually not sure what this does but it's recommended?
-	x-select-enable-primary t
+        ;; I'm actually not sure what this does but it's recommended?
+        x-select-enable-primary t
 
-	;; Save clipboard strings into kill ring before replacing them.
-	;; When one selects something in another program to paste it into Emacs,
-	;; but kills something in Emacs before actually pasting it,
-	;; this selection is gone unless this variable is non-nil
-	save-interprogram-paste-before-kill t
+        ;; Save clipboard strings into kill ring before replacing them.
+        ;; When one selects something in another program to paste it into Emacs,
+        ;; but kills something in Emacs before actually pasting it,
+        ;; this selection is gone unless this variable is non-nil
+        save-interprogram-paste-before-kill t
 
-	;; Shows all options when running apropos. For more info,
-	;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Apropos.html
-	apropos-do-all t
+        ;; Shows all options when running apropos. For more info,
+        ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Apropos.html
+        apropos-do-all t
 
-	;; Mouse yank commands yank at point instead of at click.
-	mouse-yank-at-point t)
+        ;; Mouse yank commands yank at point instead of at click.
+        mouse-yank-at-point t)
 
   ;; Set desired font.
   ;; (set-face-attribute 'default nil :font "Fira Code")
+#+END_SRC
+
+* Mode Customization
+** Org Mode
+*** Babel
+#+BEGIN_SRC emacs-lisp
+
+  ;; Enable python in org-mode.
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (shell .t)))
+
+  ;; Associated python3 with python command.
+  (setq org-babel-python-command "python3")
+#+END_SRC
+
+*** LaTeX
+#+BEGIN_SRC emacs-lisp
 #+END_SRC
 
 * Buffer Editing
@@ -405,10 +445,18 @@
     (insert-char 91)
     (insert-char 93))
 
-  (defun insert-curls ()
+  (defun insert-curl ()
     (interactive)
     (insert-char 123)
     (insert-char 125))
+#+END_SRC
+*** Key Bindings
+#+BEGIN_SRC emacs-lisp
+
+  ;; Insert keys. 
+  (keymap-global-set "C-x C-k v" 'insert-vert) 
+  (keymap-global-set "C-x C-k s" 'insert-sqr)
+  (keymap-global-set "C-x C-k c" 'insert-curl)
 #+END_SRC
 
 * AWS Utilities
