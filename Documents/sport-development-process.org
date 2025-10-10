@@ -11,6 +11,20 @@
 
 * Introduction 
 
+* Data Acquisition
+** Introduction
+** Governing Bodies
+** Event Groups
+** Teams
+
+* Development 
+** Data Feed Provider Integration
+*** Fixtures Integration
+
+** Platform Integration
+*** Ingest Infrastructure
+*** Run Infrastructure
+
 * Neural Net
 ** Data Sources
 *** Introduction
