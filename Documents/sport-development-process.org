@@ -1,4 +1,4 @@
-#+TITLE: Neural Net Development Process
+#+TITLE: Tzeract Sport Development Process
 #+STARTUP: shrink
 #+LATEX_CLASS: article
 #+LATEX_HEADER: \usepackage{xcolor}
@@ -11,12 +11,13 @@
 
 * Introduction 
 
-* Data Sources
-** Introduction
+* Neural Net
+** Data Sources
+*** Introduction
 
-** Kambi Closing Odds
+*** Kambi Closing Odds
 
-** Fixtures and Match Occurrences 
+*** Fixtures and Match Occurrences 
 Fixture and match occurrence data is sourced from team Rico in Kambi. The data is shared through the AWS S3 bucket 
 /*prod-datalake-sharing*/ which can be updated with more recent data by making a request to Team Rico [fn:1]. The
 data should be moved to the AWS S3 bucket /*tzeract-datalake-sharing*/ that's owned by Tzeract to ensure that any 

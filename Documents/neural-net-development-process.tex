@@ -1,0 +1,106 @@
+% Created 2025-10-10 Fri 14:14
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{minted}
+\usepackage{listing}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage[margin=2cm]{geometry}
+\hypersetup{colorlinks=true, linkcolor=black}
+\author{Justin Thomas Zoeller}
+\date{\today}
+\title{Tzeract Sport Development Process}
+\hypersetup{
+ pdfauthor={Justin Thomas Zoeller},
+ pdftitle={Tzeract Sport Development Process},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 30.2 (Org mode 9.7.11)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+\label{sec:org36542c8}
+
+\section{Neural Net}
+\label{sec:org668687f}
+\subsection{Data Sources}
+\label{sec:org847d006}
+\subsubsection{Introduction}
+\label{sec:orgcc318fe}
+
+\subsubsection{Kambi Closing Odds}
+\label{sec:orge87892a}
+
+\subsubsection{Fixtures and Match Occurrences}
+\label{sec:org09c9960}
+Fixture and match occurrence data is sourced from team Rico in Kambi. The data is shared through the AWS S3 bucket 
+\emph{\textbf{prod-datalake-sharing}} which can be updated with more recent data by making a request to Team Rico \footnote{\url{https://jira.services.kambi.com/secure/RapidBoard.jspa?rapidView=1068\&projectKey=DL}}. The
+data should be moved to the AWS S3 bucket \emph{\textbf{tzeract-datalake-sharing}} that's owned by Tzeract to ensure that any 
+costs associated with this bucket's use is attributed to Tzeract; syncing between S3 buckets can be accomplished by
+invoking the following command
+
+\begin{figure}[thp]\centering
+  \begin{minted}[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+fontsize=\footnotesize,
+linenos
+]{bash}
+    aws s3 sync s3://prod-datalake-sharing s3://tzeract-datalake-sharing --profile tzeract
+  \end{minted}
+\caption{S3 Bucket Sync}\label{lst:awsBucketSync}
+\end{figure}
+\noindent where the \emph{tzeract} profile must be added to the user's AWS config \textasciitilde{}/.aws/config/.
+\subsubsection{AWS S3 Bucket Contents}
+\label{sec:org41a42bb}
+The \emph{tzeract-datalake-sharing} S3 bucket contains fixture, match occurrence and miscellaneous data. Fixture data
+may be needed for league, team and player related information; match occurrences will comprise the live events that 
+occurred in a given fixture. Note that Betgenius match occurrences belong to Genius fixtures while Betradar match
+occurrences belong to Sportradar fixtures; Genius and Sportradar match occurrences are a separate products that
+nevertheless share fixtures. 
+
+\begin{table}[htbp]
+\label{tab:orgfcb8797}
+\centering
+\begin{tabular}{|p{7cm}|p{2cm}|p{3cm}|}
+\hline
+Topic & Size (GB) & Object Count\\
+\hline
+db.v2.external.runningBall.fixture & 320.5 & 249304\\
+db.v2.external.runningBall.matchOccurrence & 15.2 & 77596\\
+db.v2.external.genius.fixture & 17.2 & 18518\\
+db.v2.external.betgenius.matchOccurrence & 31.7 & 104844\\
+db.v2.external.sportradar.fixture & 307.3 & 407266\\
+db.v2.external.betradar.matchOccurrence & 62.6 & 160139\\
+db.v2.external.infront.fixture & 19.0 & 26366\\
+db.v2.external.infront.matchOccurrence & 4.6 & 27351\\
+db.v2.external.img.fixture & 71.8 & 163101\\
+db.v2.external.img.matchOccurrence & 2.3 & 14665\\
+db.v2.internal.feed.mapping & 1.2 & 153,128\\
+\hline
+Totals & 853.4 & 1249431\\
+\hline
+\end{tabular}
+\end{table}
+\begin{enumerate}
+\item Data Lake Sharing
+\label{sec:orgd23aa9d}
+\end{enumerate}
+\end{document}
