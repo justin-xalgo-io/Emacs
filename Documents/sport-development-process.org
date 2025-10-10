@@ -10,28 +10,49 @@
 #+LATEX_HEADER: \hypersetup{colorlinks=true, linkcolor=black}
 
 * Introduction 
-
+Add text here.
 * Data Acquisition
 ** Introduction
+Add text here.
 ** Governing Bodies
+Add text here.
 ** Event Groups
+Add text here.
 ** Teams
+Add text here.
+
+* Templates
+** Introduction
+Templates can refer to a number of different things at Tzeract: template keys, outcome templates, or outcome template sets. Template keys are a fundamental
+building block of outcomes; they define a sort of atomic occurrence within a sporting event. A simulation matrix is built up of many columns where each column
+represents a template key; e.g., /number of goals scored by the home team in the match/. 
 
 * Development 
+** Introduction
+Add text here.
 ** Data Feed Provider Integration
+Add text here.
 *** Fixtures Integration
+Add text here.
 
 ** Platform Integration
+*** Introduction
+Add text here.
 *** Ingest Infrastructure
+Add text here.
 *** Run Infrastructure
+Add text here.
 
 * Neural Net
+** Introduction
+Add text here.
 ** Data Sources
 *** Introduction
-
+Add text here.
 *** Kambi Closing Odds
-
+Add text here.
 *** Fixtures and Match Occurrences 
+**** Introduction
 Fixture and match occurrence data is sourced from team Rico in Kambi. The data is shared through the AWS S3 bucket 
 /*prod-datalake-sharing*/ which can be updated with more recent data by making a request to Team Rico [fn:1]. The
 data should be moved to the AWS S3 bucket /*tzeract-datalake-sharing*/ that's owned by Tzeract to ensure that any 
@@ -54,7 +75,7 @@ linenos
 #+END_EXPORT
 @@latex:\noindent@@ where the /tzeract/ profile must be added to the user's AWS config ~/.aws/config/.
 
-*** AWS S3 Bucket Contents
+**** AWS S3 Bucket Contents
 The /tzeract-datalake-sharing/ S3 bucket contains fixture, match occurrence and miscellaneous data. Fixture data
 may be needed for league, team and player related information; match occurrences will comprise the live events that 
 occurred in a given fixture. Note that Betgenius match occurrences belong to Genius fixtures while Betradar match
@@ -77,15 +98,15 @@ nevertheless share fixtures.
 | db.v2.external.infront.matchOccurrence     |       4.6 |        27351 |
 | db.v2.external.img.fixture                 |      71.8 |       163101 |
 | db.v2.external.img.matchOccurrence         |       2.3 |        14665 |
-| db.v2.internal.feed.mapping                |       1.2 |      153,128 |
+| db.v2.internal.feed.mapping                |       1.2 |       153128 |
 |--------------------------------------------+-----------+--------------|
-| Totals                                     |     853.4 |      1249431 |
+| Totals                                     |     853.4 |      1402278 |
 |--------------------------------------------+-----------+--------------|
 #+TBLFM: @>$2=vsum(@<<$2..@>>$2)
 #+TBLFM: @>$3=vsum(@<<$3..@>>$3)
 
 **** Data Lake Sharing
-
+Add text ehre.
 * Footnotes
 
 [fn:1] https://jira.services.kambi.com/secure/RapidBoard.jspa?rapidView=1068&projectKey=DL
