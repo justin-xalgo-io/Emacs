@@ -6,5 +6,5 @@
 !config.org
 !init.el
 !early-init.el
-!main/Development/**
-!main/Documents/**
+!Documents/
+!Development/
