@@ -1,0 +1,231 @@
+#+TITLE: Piecewise Probability-to-Odds Transformation
+#+AUTHOR: Justin Zoeller
+#+DATE: November 5, 2025
+#+OPTIONS: toc:t num:t
+#+STARTUP: overview
+
+* Overview
+
+This document explains the =prob2odds= function, which implements a piecewise probability-to-odds transformation using three different power-law scaling regimes based on probability ranges.
+
+* The Function
+
+#+BEGIN_SRC python
+def prob2odds(p, alpha_high_p, p_breaking_point_high, alpha_mid_p, p_breaking_point_low, alpha_low_p):
+    
+    assert alpha_high_p < 0.0
+    assert alpha_mid_p < 0.0
+    assert alpha_low_p < 0.0
+    assert p_breaking_point_low > 0.0
+    assert p_breaking_point_high >= p_breaking_point_low
+    
+    if p == 0.0:
+        
+        return 1.0
+    
+    elif p > p_breaking_point_high:
+        
+        q = p**alpha_high_p
+    
+    elif p > p_breaking_point_low:
+        
+        q = p_breaking_point_high**alpha_high_p
+        q *= (p/p_breaking_point_high)**alpha_mid_p
+    
+    else:
+        
+        q = p_breaking_point_high**alpha_high_p
+        q *= (p_breaking_point_low/p_breaking_point_high)**alpha_mid_p
+        q *= (p/p_breaking_point_low)**alpha_low_p
+    
+    return max(1.0, q - 0.01)
+#+END_SRC
+
+* Function Purpose
+
+The function =prob2odds= converts a probability =p= into an odds-like value using different power-law transformations depending on which range the probability falls into. This creates a graduated compression system where different probability ranges receive different levels of transformation.
+
+* Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| =p= | float | Input probability to transform |
+| =alpha_high_p= | float | Negative scaling exponent for high probability range |
+| =alpha_mid_p= | float | Negative scaling exponent for middle probability range |
+| =alpha_low_p= | float | Negative scaling exponent for low probability range |
+| =p_breaking_point_high= | float | Upper threshold defining probability ranges |
+| =p_breaking_point_low= | float | Lower threshold defining probability ranges |
+
+* Input Validation
+
+The function enforces strict constraints on its parameters:
+
+#+BEGIN_SRC python
+assert alpha_high_p < 0.0
+assert alpha_mid_p < 0.0
+assert alpha_low_p < 0.0
+assert p_breaking_point_low > 0.0
+assert p_breaking_point_high >= p_breaking_point_low
+#+END_SRC
+
+** Requirements:
+- All alpha values must be negative
+- Breaking points must be positive
+- High breaking point must be ≥ low breaking point
+
+* Power Law Fundamentals
+
+** Basic Form
+A power law transformation has the form: *y = x^α*
+
+** Properties when α < 0
+- *Decreasing function*: As x increases, y decreases
+- *Hyperbolic shape*: Creates a curved relationship, not linear
+- *Asymptotic behavior*: Approaches 0 as x approaches infinity
+- *Compression effect*: y = x^α = 1/x^|α|
+
+** Example with α = -0.5:
+| p | q = p^(-0.5) | Effect |
+|---|--------------|--------|
+| 0.1 | ≈ 3.16 | High amplification |
+| 0.5 | ≈ 1.41 | Moderate amplification |
+| 0.9 | ≈ 1.05 | Minimal amplification |
+
+*Notice*: Small probabilities get amplified much more than large probabilities.
+
+* Three-Regime Transformation System
+
+** Regime 1: High Probability Range
+*Condition*: =p > p_breaking_point_high=
+
+#+BEGIN_SRC python
+q = p**alpha_high_p
+#+END_SRC
+
+- *Direct power transformation*
+- Straightforward compression of high probabilities
+- Single power law application
+
+** Regime 2: Middle Probability Range  
+*Condition*: =p_breaking_point_low < p ≤ p_breaking_point_high=
+
+#+BEGIN_SRC python
+q = p_breaking_point_high**alpha_high_p
+q *= (p/p_breaking_point_high)**alpha_mid_p
+#+END_SRC
+
+- *Multiplicative chaining*
+- Starts with transformed value at high breakpoint
+- Applies additional scaling based on distance below breakpoint
+- Ratio =(p/p_breaking_point_high)= is always ≤ 1
+- Negative exponent amplifies the base value
+
+** Regime 3: Low Probability Range
+*Condition*: =p ≤ p_breaking_point_low=
+
+#+BEGIN_SRC python
+q = p_breaking_point_high**alpha_high_p
+q *= (p_breaking_point_low/p_breaking_point_high)**alpha_mid_p
+q *= (p/p_breaking_point_low)**alpha_low_p
+#+END_SRC
+
+- *Triple chaining* accumulates transformations:
+  1. Base transformation at high breakpoint
+  2. Mid-range adjustment from high to low breakpoint
+  3. Low-range scaling from low breakpoint to actual =p=
+
+* Mathematical Continuity
+
+The piecewise design ensures *smooth transitions* at breakpoints.
+
+** At p = p_breaking_point_high:
+- *Regime 1*: =q = p_breaking_point_high**alpha_high_p=
+- *Regime 2*: =q = p_breaking_point_high**alpha_high_p * 1 = p_breaking_point_high**alpha_high_p=
+
+The values match exactly, ensuring no discontinuous jumps.
+
+** At p = p_breaking_point_low:
+Similar continuity is maintained between Regime 2 and Regime 3.
+
+* Special Cases
+
+** Zero Probability
+#+BEGIN_SRC python
+if p == 0.0:
+    return 1.0
+#+END_SRC
+
+Returns neutral odds value of 1.0.
+
+** Final Adjustment
+#+BEGIN_SRC python
+return max(1.0, q - 0.01)
+#+END_SRC
+
+- Ensures result is at least 1.0
+- Applies small adjustment factor of 0.01
+- Prevents odds from falling below neutral
+
+* Practical Effects
+
+This creates a *graduated compression system*:
+
+| Probability Range | Compression Level | Mechanism |
+|-------------------|-------------------|-----------|
+| High probabilities | Moderate | Single power law |
+| Medium probabilities | Increased | Two power laws combined |
+| Low probabilities | Maximum | Three power laws stacked |
+
+** Key Behavior:
+- *Very small probabilities* get dramatically amplified
+- *High probabilities* receive moderate compression
+- *Smooth, predictable behavior* across all ranges
+
+* Applications
+
+This type of transformation is commonly used in:
+
+- *Betting systems*: Converting probabilities to betting odds
+- *Risk assessment*: Amplifying rare event probabilities  
+- *Machine learning*: Feature scaling with non-linear emphasis
+- *Decision theory*: Probability weighting functions
+
+** Why Use This Approach?
+- Rare events (low probabilities) receive proportionally higher weights
+- Maintains mathematical rigor with continuous transitions
+- Provides flexible control over transformation sensitivity
+- Prevents extreme values while preserving relative ordering
+
+* Mathematical Properties
+
+** Monotonicity
+The function maintains monotonic behavior: if p₁ < p₂, then prob2odds(p₁) ≥ prob2odds(p₂)
+
+** Bounded Output
+The function ensures output ≥ 1.0, providing a lower bound for practical applications.
+
+** Differentiability
+The function is differentiable within each regime, with potential discontinuities in derivatives at breakpoints.
+
+* Implementation Notes
+
+** Performance Considerations
+- Power operations can be computationally expensive
+- Consider caching for repeated calculations with same parameters
+- Vectorization possible for batch processing
+
+** Numerical Stability
+- Assertions prevent invalid parameter combinations
+- Special handling of zero probability prevents division issues
+- Final max() operation prevents unexpected negative results
+
+* Conclusion
+
+The =prob2odds= function provides a sophisticated, mathematically sound approach to probability transformation that:
+
+1. Preserves the relative ordering of probabilities
+2. Applies graduated compression based on probability magnitude  
+3. Maintains continuity across transition points
+4. Provides practical bounds for real-world applications
+
+This makes it particularly valuable in scenarios where rare events need proportional emphasis while maintaining stable, predictable behavior across the full probability spectrum.
