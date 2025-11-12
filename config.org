@@ -37,7 +37,7 @@
 ** General
 *** Navigation
 #+BEGIN_SRC emacs-lisp
-
+  
   ;; These customizations make it easier for you to navigate files,
   ;; switch buffers, and choose options from the minibuffer.
 
@@ -57,20 +57,19 @@
   (setup (:package counsel)
     (ivy-mode)
     (:option ivy-use-virtual-buffers t
-	     ivy-re-builders-alist '((t . ivy--regex-ignore-order))
-	     ivy-count-format "%d/%d ")
+             ivy-re-builders-alist '((t . ivy--regex-ignore-order))
+             ivy-count-format "%d/%d ")
     (:global "C-s" swiper
-	     "s-f" swiper
-	     "C-x C-f" counsel-find-file
-	     "C-x C-b" counsel-switch-buffer
-	     "M-x" counsel-M-x))
+             "s-f" swiper
+             "C-x C-f" counsel-find-file
+             "C-x C-b" counsel-switch-buffer
+             "M-x" counsel-M-x))
 
   ;; Add ivy-rich-mode adds docstrings and additional metadata
   ;; in the ivy picker minibuffer
   (setup (:package ivy-rich)
     (ivy-rich-mode))
 #+END_SRC
-
 *** Shell Integration
 #+BEGIN_SRC emacs-lisp
 
@@ -105,6 +104,7 @@
   ;; counsel's browse-and-select UI.
   (setup (:package counsel-projectile))
 #+END_SRC
+
 *** File Tree
 #+BEGIN_SRC emacs-lisp
 
@@ -114,6 +114,7 @@
 	     "M-o" ace-window ;; treemacs brings ace-window as a dependency
 	     "s-b" treemacs))
 #+END_SRC
+
 *** Elisp Editing
 #+BEGIN_SRC emacs-lisp
 
@@ -142,11 +143,12 @@
 #+BEGIN_SRC emacs-lisp
 
   ;; Setup packages.
-  (setup (:package python-mode))
-  ;;  (:hook elpy-mode))
-  (setup (:package elpy))
-  (setup (:package pyenv-mode))
+  (setup (:package python-mode)
+    (:hook elpy-mode))
 
+  ;; (setup (:package elpy))
+  ;; (setup (:package jedi))
+  ;; (elpy-enable)
   ;; Setup python for 
   (require 'pyenv-mode)
   (defun projectile-pyenv-mode-set ()
@@ -177,8 +179,8 @@
   ;; like names of Java classes (e.g. JavaClassName).
   (setup (:package clojure-mode)
     (:hook subword-mode
-	   paredit-mode
-	   lsp))
+           paredit-mode
+           lsp))
 
   ;; CIDER is a whole interactive development environment for
   ;; Clojure. There is a ton of functionality here, so be sure
@@ -186,18 +188,18 @@
   ;; https://docs.cider.mx/cider/index.html
   (setup (:package cider)
     (:bind "C-c u" cider-user-ns
-	   "C-M-r" cider-refresh)
+           "C-M-r" cider-refresh)
     (:option cider-show-error-buffer t
-	     cider-auto-select-error-buffer t
-	     cider-repl-history-file "~/.emacs.d/cider-history"
-	     cider-repl-pop-to-buffer-on-connect t
-	     cider-repl-wrap-history t))
+             cider-auto-select-error-buffer t
+             cider-repl-history-file "~/.emacs.d/cider-history"
+             cider-repl-pop-to-buffer-on-connect t
+             cider-repl-wrap-history t))
 
   ;; Company provides auto-completion for CIDER:
   ;; see https://docs.cider.mx/cider/usage/code_completion.html
   (setup (:package company)
     (:hook-into cider-mode
-		cider-repl-mode))
+        	cider-repl-mode))
 
   ;; Hydra provides a nice looking menu for commands
   ;; to see what's available, use M-x and the prefix cider-hydra:
@@ -300,7 +302,7 @@
 
   (setup (:package doom-themes)
     (when (not custom-enabled-themes)
-      (load-theme 'doom-dracula t)))
+      (load-theme 'doom-lantern t)))
 
   ;; These settings relate to how emacs interacts with your operating system.
   (setq ;; makes killing/yanking interact with the clipboard
@@ -469,7 +471,7 @@
 
   (defconst aws-staging-target "i-061d161a45675bcba")
   (defconst aws-production-target "i-032ae2a295b56a522")
-  (defconst aws-development-target "i-00818a3043f77dc2c")
+  (defconst aws-development-target "i-0714007d1e050165c")
 
   (defconst aws-staging-host "platform-calc-unit-stack-infradatamapperdatabase76-ijedhlvmxrcc.cluster-ro-cswq2ejbbl7p.eu-west-1.rds.amazonaws.com")
   (defconst aws-production-host "platform-calc-unit-stack-infradatamapperdatabasewr-cgznowvjpooi.chlhwmxght0e.eu-west-1.rds.amazonaws.com")
