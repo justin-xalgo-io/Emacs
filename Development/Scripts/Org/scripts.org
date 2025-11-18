@@ -1,0 +1,51 @@
+* Git
+** Rebase
+#+NAME rebase-branch
+#+BEGIN_SRC sh
+# Fetch the latest changes from remote
+git fetch origin
+
+# Make sure you're on your branch
+git checkout justho/task/add-match-structure-defaults-sql
+
+# Rebase your branch onto main
+git rebase origin/main
+
+# If there are conflicts, resolve them, then:
+git add .
+git rebase --continue
+
+# Force push (since rebase rewrites history)
+git push --force-with-lease origin justho/task/add-match-structure-defaults-sql
+#+END_SRC
+
+* Database
+** Migrations
+#+NAME apply-dev-db-migrations
+#+BEGIN_SRC python 
+
+yoyo apply --database postgresql://postgres:GoqNv=jBM7SLlxD4DNOc9PtRD-Q8dh@localhost:25432/data_mapper -v
+
+#+END_SRC 
+
+* Tzeract
+** Environment
+#+BEGIN_SRC sh
+#!/bin/bash
+# Load PYTHONPATH from .env
+export $(grep PYTHONPATH /Users/justho/Work/Repos/xalgo-sport-tribes/.env | xargs)
+
+# Activate virtualenv
+source /Users/justho/Work/Repos/xalgo-sport-tribes/dist/export/python/virtualenvs/python-default/3.12.12/bin/activate
+
+# Add resources.
+export OPTA_OUTLET_KEY=18h6vesjponn21tvsintr27ihd
+export OPTA_SECRET_KEY=jtuf0zbfx4q512vhaq657k50o
+export BETRADAR_ACCESS_TOKEN=V3tQW0htem0UMreRWG
+#+END_SRC
+
+** Mappings
+#+BEGIN_SRC python
+python ./development/matedm/auto-mapping/script.py run --db-url "postgresql://developer:mkIzeDGDw3fV7BU5Cg=LAvfVOH99EY@localhost:25432/data_mapper" --event-group-xid "egr_11bae623769f8e3327490b0a4be12f292fbf7d69" --source-provider "opta" --runningball-csv "/Users/justho/Work/Repos/xalgo-sport-tribes/players.csv" --export-runningball-sql "test.csv"
+#+END_SRC
+
