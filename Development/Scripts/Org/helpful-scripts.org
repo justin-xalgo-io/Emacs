@@ -1,0 +1,68 @@
+* Git
+** Rebase
+#+NAME rebase-branch
+#+BEGIN_SRC sh
+# Fetch the latest changes from remote
+git fetch origin
+
+# Make sure you're on your branch
+git checkout justho/task/add-match-structure-defaults-sql
+
+# Rebase your branch onto main
+git rebase origin/main
+
+# If there are conflicts, resolve them, then:
+git add .
+git rebase --continue
+
+# Force push (since rebase rewrites history)
+git push --force-with-lease origin justho/task/add-match-structure-defaults-sql
+#+END_SRC
+
+* Database
+** Migrations
+#+NAME apply-dev-db-migrations
+#+BEGIN_SRC python 
+
+yoyo apply --database postgresql://postgres:GoqNv=jBM7SLlxD4DNOc9PtRD-Q8dh@localhost:25432/data_mapper -v
+
+#+END_SRC 
+
+* Tzeract
+** Player Mappings
+#+BEGIN_SRC sh
+#!/bin/bash
+# Load PYTHONPATH from .env
+export $(grep PYTHONPATH /Users/justho/Work/Repos/xalgo-sport-tribes/.env | xargs)
+
+# Activate virtualenv
+source /Users/justho/Work/Repos/xalgo-sport-tribes/dist/export/python/virtualenvs/python-default/3.12.12/bin/activate
+
+# Add resources.
+export OPTA_OUTLET_KEY=18h6vesjponn21tvsintr27ihd
+export OPTA_SECRET_KEY=jtuf0zbfx4q512vhaq657k50o
+export BETRADAR_ACCESS_TOKEN=V3tQW0htem0UMreRWG
+
+PROVIDER="betradar"
+XID="egr_11bae623769f8e3327490b0a4be12f292fbf7d69"
+
+# Run the automap script: required arg is --event-group-xid; optionally set --db-url, --outdir, etc.
+python development/matedm/auto-mapping/script.py run \
+  --event-group-xid $XID \
+  --db-url "postgresql://developer:mkIzeDGDw3fV7BU5Cg=LAvfVOH99EY@localhost:25432/data_mapper" \
+  --outdir "./out" \
+  --source-provider $PROVIDER \
+  --fuzzy-threshold 90
+# Run 
+#+END_SRC
+
+* AWS Data Lake
+** Example
+#+BEGIN_SRC sh
+OUT=$(aws sts assume-role --role-arn arn:aws:iam::623937952596:role/kambi-s3-data-access --role-session-name tzeract)
+export AWS_ACCESS_KEY_ID=$(echo $OUT | jq -r '.Credentials''.AccessKeyId')
+export AWS_SESSION_TOKEN=$(echo $OUT | jq -r '.Credentials''.SessionToken')
+export AWS_SECRET_ACCESS_KEY=$(echo $OUT | jq -r '.Credentials''.SecretAccessKey')
+aws sts get-caller-identity
+aws s3 ls s3://prod-drti-data/data/v2/parquet/topic=dp.v2.external.sportradar.fixture 
+#+END_SRC
